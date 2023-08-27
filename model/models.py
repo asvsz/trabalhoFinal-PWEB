@@ -1,33 +1,36 @@
+import array
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
+import uuid
 
 db = SQLAlchemy()
 ma = Marshmallow()
 
 class Client(db.Model):
-    id = db.Column(db.Uuid, primary_key=True)
+    id = db.Column(db.Uuid, primary_key=True, default=str(uuid.uuid4()))
     name = db.Column(db.String(100))
     email = db.Column(db.String(100))
     phone = db.Column(db.String(25))
     
-class BarberShop(db.Model):
-    id = db.Column(db.Uuid, primary_key=True)
-    cnpj = db.Column(db.String(50))
-    name = db.Column(db.String(100))
-    #free_time = db.relationship('Time', backref='barber_shop', lazy=True)
-    #reservations = db.relationship('ClientArtTime', backref='barber_shop', lazy=True)
-
 class Time(db.Model):
-    id = db.Column(db.Uuid, primary_key=True)
+    id = db.Column(db.Uuid, primary_key=True, default=str(uuid.uuid4()))
     start_time = db.Column(db.Time)
     end_time = db.Column(db.Time)
     id_barber_shop = db.Column(db.Uuid, db.ForeignKey('barber_shop.id'), nullable=False)
     day = db.Column(db.DateTime)
     
 class ClientArtTime(db.Model):
-    id = db.Column(db.Uuid, primary_key=True)
+    id = db.Column(db.Uuid, primary_key=True, default=str(uuid.uuid4()))
     id_client = db.Column(db.Uuid, db.ForeignKey('client.id'), nullable=False)
     id_time = db.Column(db.Uuid, db.ForeignKey('time.id'), nullable=False)
+    id_barber_shop = db.Column(db.Uuid, db.ForeignKey('barber_shop.id'), nullable=False)
+    
+class BarberShop(db.Model):
+    id = db.Column(db.Uuid, primary_key=True, default=str(uuid.uuid4()))
+    cnpj = db.Column(db.String(50))
+    name = db.Column(db.String(100))
+    free_times = db.relationship('Time', backref='barber_shop', lazy=True)
+    reservations = db.relationship('ClientArtTime', backref='barber_shop', lazy=True)
     
 class ClientSchema(ma.Schema):
     class Meta:

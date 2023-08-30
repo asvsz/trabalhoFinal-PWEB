@@ -10,7 +10,7 @@ class Client(db.Model):
     phone = db.Column(db.String(25))
     email = db.Column(db.String(50))
     resevation = db.relationship('Resevation', backref='client')
-    
+      
 class BarberShop(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(50))
@@ -39,18 +39,18 @@ class BarberShopSchema(ma.Schema):
         fields = ('id', 'name', 'cnpj', 'time')
         include_fk = True
     
-class ResevationSchema(db.Model):
+class ResevationSchema(ma.Schema):
     class Meta:
         fields = ('id', 'id_client', 'id_time')
         include_fk = True
         
-class TimeSchema(db.Model):
+class TimeSchema(ma.Schema):
     class Meta:
         fields = ('id', 'start_time', 'end_time', 'date', 'id_barber_shop')
         include_fk = True
             
 class ClientWithResevation(ClientSchema):
-    resevation = ma.Nasted(ResevationSchema, many=True)
+    resevation = ma.Nested(ResevationSchema, many=True)
     
 class BarberShopWithTime(BarberShop):
-    time = ma.Nasted(TimeSchema, many=True)
+    time = ma.Nested(TimeSchema, many=True)

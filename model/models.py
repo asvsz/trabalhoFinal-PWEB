@@ -9,7 +9,7 @@ class Client(db.Model):
     name = db.Column(db.String(50))
     phone = db.Column(db.String(25))
     email = db.Column(db.String(50))
-    resevation = db.relationship('Resevation', backref='client')
+    reservation = db.relationship('Reservation', backref='client')
       
 class BarberShop(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -17,7 +17,7 @@ class BarberShop(db.Model):
     cnpj = db.Column(db.String(50))
     time = db.relationship('Time', backref='barber_shop')
     
-class Resevation(db.Model):
+class Reservation(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     id_client = db.Column(db.Integer, db.ForeignKey('client.id'), nullable=False)
     id_time = db.Column(db.Integer, db.ForeignKey('time.id'), nullable=False)
@@ -39,7 +39,7 @@ class BarberShopSchema(ma.Schema):
         fields = ('id', 'name', 'cnpj', 'time')
         include_fk = True
     
-class ResevationSchema(ma.Schema):
+class ReservationSchema(ma.Schema):
     class Meta:
         fields = ('id', 'id_client', 'id_time')
         include_fk = True
@@ -49,8 +49,8 @@ class TimeSchema(ma.Schema):
         fields = ('id', 'start_time', 'end_time', 'date', 'id_barber_shop')
         include_fk = True
             
-class ClientWithResevation(ClientSchema):
-    resevation = ma.Nested(ResevationSchema, many=True)
+class ClientWithReservation(ClientSchema):
+    reservation = ma.Nested(ReservationSchema, many=True)
     
 class BarberShopWithTime(BarberShop):
     time = ma.Nested(TimeSchema, many=True)

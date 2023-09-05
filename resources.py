@@ -1,5 +1,5 @@
 from flask_restful import Resource, reqparse, request
-from datetime import datetime, time
+from datetime import datetime
 from model.models import db, BarberShop, BarberShopSchema, Time, TimeSchema, Reservation, ReservationSchema, ClientWithReservation, ClientSchema
 from model.models import Client
 
@@ -31,17 +31,20 @@ class TimeResource(Resource):
     date_str = args['date']
     id_barber_shop = args['id_barber_shop']
     
-    #Casting de String para DateTime
-    start_time = datetime.strptime(start_time_str, '%H:%M:%S').time()
-    end_time = datetime.strptime(end_time_str, '%H:%M:%S').time()
-    date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    id_barber = BarberShop.query.get(id_barber_shop) #Verifica a existência da barbearia
+    if id_barber is not None:
+      #Casting de String para DateTime
+      start_time = datetime.strptime(start_time_str, '%H:%M:%S').time()
+      end_time = datetime.strptime(end_time_str, '%H:%M:%S').time()
+      date = datetime.strptime(date_str, '%Y-%m-%d').date()
 
-    #Instância da classe
-    time = Time(start_time=start_time, end_time=end_time, date=date, id_barber_shop=id_barber_shop)
+      #Instância da classe
+      time = Time(start_time=start_time, end_time=end_time, date=date, id_barber_shop=id_barber_shop)
 
-    db.session.add(time)
-    db.session.commit()
-    return TimeSchema().dump(time), 201
+      db.session.add(time)
+      db.session.commit()
+      return TimeSchema().dump(time), 201
+    return {'message': 'A barbearia com o id: {} não foi encontrada'.format(id_barber_shop)}, 400
     
 class BarberResource(Resource):
   #Todas as reservas

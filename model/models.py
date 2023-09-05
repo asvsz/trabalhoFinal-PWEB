@@ -52,5 +52,5 @@ class TimeSchema(ma.Schema):
 class ClientWithReservation(ClientSchema):
     reservation = ma.Nested(ReservationSchema, many=True)
     
-class BarberShopWithTime(BarberShop):
+class BarberShopWithTime(BarberShopSchema):
     time = ma.Nested(TimeSchema, many=True)

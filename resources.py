@@ -1,16 +1,20 @@
 from flask_restful import Resource, reqparse, request
-from flask import jsonify
 from datetime import datetime, time
 from model.models import db, BarberShop, BarberShopSchema, Time, TimeSchema, Reservation, ReservationSchema, ClientWithReservation, ClientSchema
 from model.models import Client
 
-
-class BarberTimeResource(Resource):
-  #Todos os horários
-  def get(self, time_id=None ):
+class TimeResource(Resource):
+  def get(self, time_id=None):
+    #Retorna todos os times
     if time_id is None:
       times = Time.query.all()
       return TimeSchema(many=True).dump(times), 200
+    
+    #Retorna determinado time
+    time = Time.query.get(time_id)
+    if time is not None:
+      return TimeSchema().dump(time), 200
+    return {'message': 'Horário não encontrado'}, 404
     
   #Adicionar novo horário
   def post(self):
@@ -27,6 +31,7 @@ class BarberTimeResource(Resource):
     date_str = args['date']
     id_barber_shop = args['id_barber_shop']
     
+    #Casting de String para DateTime
     start_time = datetime.strptime(start_time_str, '%H:%M:%S').time()
     end_time = datetime.strptime(end_time_str, '%H:%M:%S').time()
     date = datetime.strptime(date_str, '%Y-%m-%d').date()
@@ -36,7 +41,6 @@ class BarberTimeResource(Resource):
 
     db.session.add(time)
     db.session.commit()
-    
     return TimeSchema().dump(time), 201
     
 class BarberResource(Resource):
@@ -104,7 +108,3 @@ class ClientCreateResource(Resource):
     db.session.add(client)
     db.session.commit()
     return ClientSchema().dump(client), 201
-    
-
-
-    

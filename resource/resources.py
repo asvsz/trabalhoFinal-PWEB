@@ -1,6 +1,6 @@
 from flask_restful import Resource, reqparse
 from datetime import datetime
-from model.models import db, BarberShop, BarberShopSchema, Time, TimeSchema, ClientWithReservation, ClientSchema, BarberShopWithTime
+from model.models import db, BarberShop, BarberShopSchema, Time, TimeSchema, ClientWithReservation, ClientSchema, BarberShopWithTime, Reservation, ReservationSchema
 from model.models import Client
 
 class TimeResource(Resource):
@@ -45,17 +45,20 @@ class TimeResource(Resource):
       return TimeSchema().dump(time), 201
     return {'message': 'A barbearia com o id: {} não foi encontrada'.format(id_barber_shop)}, 400
   
+  '''
   #Deleta determinado horário
   def delete(self, time_id=None):
     time = Time.query.get(time_id)
-    if time is not None:
+    reservartion = Reservation.query.filter_by(id_time=time_id).all()
+    if reservartion is not None:
       try: 
         db.session.delete(time)
         db.session.commit()
-        return {'message': 'Reserva excluida com sucesso'}, 204
+        return {'message': 'Horário excluido com sucesso'}, 204
       except Exception:
-        return {'message': 'A reserva não pode ser excluida pois está em uso'}, 409
-    return {'message': 'Reserva não encontrada'}, 404
+        return {'message': 'O horário não pode ser excluido pois está em uso'}, 409
+    return {'message': 'Horário não encontrada'}, 404
+    '''
     
 class BarberShopResource(Resource):
   def get(self, barbershop_id=None):
@@ -70,11 +73,11 @@ class BarberShopResource(Resource):
       return BarberShopWithTime().dump(barber_shop), 200
     return {'message': 'Barbearia não encontrada'}, 404
       
-  #Adiona um novo Barbeiro    
+  #Adiona um novo barbeiro    
   def post(self):
     parser = reqparse.RequestParser()
     parser.add_argument('name', type=str, required=True)
-    parser.add_argument('cpnj', type=str, required=True)
+    parser.add_argument('cnpj', type=str, required=True)
     args = parser.parse_args()
     
     barber = BarberShop(name=args['name'], cnpj=args['cpnj'])
@@ -95,6 +98,7 @@ class ClientResource(Resource):
       return ClientWithReservation().dump(client), 200
     return {'message': 'Client não encontrada'}, 404
     
+  #Adiciona um novo cliente
   def post(self):
     parser = reqparse.RequestParser()
     parser.add_argument('name', type=str, required=True)
@@ -106,3 +110,37 @@ class ClientResource(Resource):
     db.session.add(client)
     db.session.commit()
     return ClientSchema().dump(client), 201
+  
+class ResevationResource(Resource):
+  def get(self, reservation_id=None):
+      #Retorna todos as reservas
+      if reservation_id is None:
+        reservations = Reservation.query.all()
+        return ReservationSchema(many=True).dump(reservations), 200
+      
+      #Retorna determinado reserva
+      reservation = Reservation.query.get(reservation_id)
+      if reservation is not None:
+        return ReservationSchema().dump(reservation), 200
+      return {'message': 'Reserva não encontrada'}, 404
+    
+  #Adiciona uma nova reserva
+  def post(self):
+    parser = reqparse.RequestParser()
+    parser.add_argument('id_client', type=int, required=True)
+    parser.add_argument('id_time', type=int, required=True)
+    args = parser.parse_args()
+    
+    reservation = Reservation(id_client=args['id_client'], id_time=args['id_time'])
+    db.session.add(reservation)
+    db.session.commit()
+    return ReservationSchema().dump(reservation), 201
+  
+  #Deleta determinada reserva
+  def delete(self, reservation_id=None):
+    reservation = Reservation.query.get(reservation_id)
+    if reservation is not None:
+      db.session.delete(reservation)
+      db.session.commit()
+      return {'message': 'Reserva excluida com sucesso'}, 204
+    return {'message': 'Reserva não encontrada'}, 404 

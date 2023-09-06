@@ -45,7 +45,6 @@ class TimeResource(Resource):
       return TimeSchema().dump(time), 201
     return {'message': 'A barbearia com o id: {} não foi encontrada'.format(id_barber_shop)}, 400
   
-  '''
   #Deleta determinado horário
   def delete(self, time_id=None):
     time = Time.query.get(time_id)
@@ -58,7 +57,7 @@ class TimeResource(Resource):
       except Exception:
         return {'message': 'O horário não pode ser excluido pois está em uso'}, 409
     return {'message': 'Horário não encontrada'}, 404
-    '''
+
     
 class BarberShopResource(Resource):
   def get(self, barbershop_id=None):
@@ -80,7 +79,7 @@ class BarberShopResource(Resource):
     parser.add_argument('cnpj', type=str, required=True)
     args = parser.parse_args()
     
-    barber = BarberShop(name=args['name'], cnpj=args['cpnj'])
+    barber = BarberShop(name=args['name'], cnpj=args['cnpj'])
     db.session.add(barber)
     db.session.commit()
     return BarberShopSchema().dump(barber), 201
@@ -118,7 +117,7 @@ class ResevationResource(Resource):
         reservations = Reservation.query.all()
         return ReservationSchema(many=True).dump(reservations), 200
       
-      #Retorna determinado reserva
+      #Retorna determinada reserva
       reservation = Reservation.query.get(reservation_id)
       if reservation is not None:
         return ReservationSchema().dump(reservation), 200
@@ -128,14 +127,26 @@ class ResevationResource(Resource):
   def post(self):
     parser = reqparse.RequestParser()
     parser.add_argument('id_client', type=int, required=True)
-    parser.add_argument('id_time', type=int, required=True)
+    parser.add_argument('id_time', type=int, required=True)    
     args = parser.parse_args()
-    
     reservation = Reservation(id_client=args['id_client'], id_time=args['id_time'])
+    
+    #Verifica a existência do cliente
+    client_id = reservation.id_client
+    client = Client.query.get(client_id)
+    if client is None:
+      return {'message': 'O cliente com o id: {} não foi encontrada'.format(client_id)}, 400
+    
+    #Verifica a existência do horário
+    time_id = reservation.id_time
+    time = Time.query.get(time_id)
+    if time is None:
+      return {'message': 'O horário com o id: {} não foi encontrada'.format(time_id)}, 400
+    
     db.session.add(reservation)
     db.session.commit()
     return ReservationSchema().dump(reservation), 201
-  
+    
   #Deleta determinada reserva
   def delete(self, reservation_id=None):
     reservation = Reservation.query.get(reservation_id)

@@ -47,18 +47,16 @@ class TimeResource(Resource):
   
   #Deleta determinado horário
   def delete(self, time_id=None):
-    time = Time.query.get(time_id)
-    reservartion = Reservation.query.filter_by(id_time=time_id).all()
-    if reservartion is not None:
-      try: 
+    time = Time.query.get(time_id) #Verifica a existência do horário
+    if time is not None:
+      reservations = Reservation.query.filter_by(id_time=time_id).all() #Verifica se o horário está associado a uma reserva.
+      if not reservations:
         db.session.delete(time)
         db.session.commit()
         return {'message': 'Horário excluido com sucesso'}, 204
-      except Exception:
-        return {'message': 'O horário não pode ser excluido pois está em uso'}, 409
+      return {'message': 'O horário não pode ser excluido pois está em uso'}, 409
     return {'message': 'Horário não encontrada'}, 404
-
-    
+  
 class BarberShopResource(Resource):
   def get(self, barbershop_id=None):
     #Retorna todos os barbearias

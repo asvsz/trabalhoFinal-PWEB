@@ -9,13 +9,13 @@ class Client(db.Model):
     name = db.Column(db.String(50))
     phone = db.Column(db.String(25))
     email = db.Column(db.String(50))
-    reservation = db.relationship('Reservation', backref='client')
+    reservation = db.relationship('Reservation', backref='client', cascade='all, delete-orphan')
       
 class BarberShop(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(50))
     cnpj = db.Column(db.String(50))
-    time = db.relationship('Time', backref='barber_shop')
+    time = db.relationship('Time', backref='barber_shop', cascade='all, delete-orphan')
     
 class Reservation(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

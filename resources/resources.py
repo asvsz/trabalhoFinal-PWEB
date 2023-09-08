@@ -1,7 +1,6 @@
 from flask_restful import Resource, reqparse
 from datetime import datetime
-from model.models import db, BarberShop, BarberShopSchema, Time, TimeSchema, ClientWithReservation, ClientSchema, BarberShopWithTime, Reservation, ReservationSchema
-from model.models import Client
+from models.models import db, BarberShop, BarberShopSchema, Time, TimeSchema, ClientWithReservation, ClientSchema, BarberShopWithTime, Reservation, ReservationSchema, Client
 
 class TimeResource(Resource):
   def get(self, time_id=None):
@@ -152,4 +151,4 @@ class ResevationResource(Resource):
       db.session.delete(reservation)
       db.session.commit()
       return {'message': 'Reserva excluida com sucesso'}, 204
-    return {'message': 'Reserva não encontrada'}, 404 
+    return {'message': 'Reserva não encontrada'}, 404
